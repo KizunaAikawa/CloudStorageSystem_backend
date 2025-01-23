@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import ryu.cloudstoragesystem_backend.auth.service.AuthService;
 import ryu.cloudstoragesystem_backend.user.User;
 import ryu.cloudstoragesystem_backend.user.exception.PasswordNotEmptyException;
-import ryu.cloudstoragesystem_backend.user.exception.UserAlreadyLoginException;
 import ryu.cloudstoragesystem_backend.user.exception.WrongPasswordException;
 import ryu.cloudstoragesystem_backend.user.service.LoginService;
 import ryu.cloudstoragesystem_backend.user.service.RegisterService;
@@ -49,13 +48,11 @@ public class UserController {
     public Map<String, String> login(@RequestParam @NotBlank String username,
                                      @RequestParam @NotBlank @Size(min = 8, max = 32) String password,
                                      HttpServletResponse response) {
-        if (!authService.isLogin(username)) {
-            String token = loginService.login(username, password);
-            response.setHeader("Authorization", token);
-            Map<String, String> responseBody = new LinkedHashMap<>();
-            responseBody.put("username", username);
-            return responseBody;
-        } else throw new UserAlreadyLoginException();
+        String token = loginService.login(username, password);
+        response.setHeader("Authorization", token);
+        Map<String, String> responseBody = new LinkedHashMap<>();
+        responseBody.put("username", username);
+        return responseBody;
     }
 
     @PutMapping("/me/password")

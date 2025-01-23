@@ -1,4 +1,4 @@
-package ryu.cloudstoragesystem_backend.auth;
+/*package ryu.cloudstoragesystem_backend.auth;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +22,4 @@ public interface TokenDAO extends JpaRepository<Token, Long> {
 
     @Transactional
     int deleteByTimeStampBefore(Long timeStamp);
-}
+}*/

@@ -1,4 +1,4 @@
-package ryu.cloudstoragesystem_backend.auth;
+/*package ryu.cloudstoragesystem_backend.auth;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -28,4 +28,4 @@ public class Token {
         this.tokenValue = UUID.randomUUID().toString();
         this.timeStamp = System.currentTimeMillis();
     }
-}
+}*/
