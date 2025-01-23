@@ -8,4 +8,8 @@ public class PasswordNotEmptyException extends RuntimeException {
     public PasswordNotEmptyException() {
         super("Password is empty");
     }
+
+    public PasswordNotEmptyException(String message) {
+        super(message);
+    }
 }

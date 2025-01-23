@@ -8,4 +8,8 @@ public class UserNotExistException extends RuntimeException {
     public UserNotExistException() {
         super("User not exist");
     }
+
+    public UserNotExistException(String message) {
+        super(message);
+    }
 }

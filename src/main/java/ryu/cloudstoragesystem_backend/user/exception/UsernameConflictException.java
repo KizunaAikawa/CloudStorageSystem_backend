@@ -8,4 +8,8 @@ public class UsernameConflictException extends RuntimeException {
     public UsernameConflictException() {
         super("Username already exist");
     }
+
+    public UsernameConflictException(String message) {
+        super(message);
+    }
 }

@@ -8,4 +8,8 @@ public class TokenUnavailableException extends RuntimeException {
     public TokenUnavailableException() {
         super("Token unavailable");
     }
+
+    public TokenUnavailableException(String message) {
+        super(message);
+    }
 }

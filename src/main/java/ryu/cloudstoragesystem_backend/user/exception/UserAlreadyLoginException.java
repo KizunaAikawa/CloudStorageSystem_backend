@@ -8,4 +8,8 @@ public class UserAlreadyLoginException extends RuntimeException {
     public UserAlreadyLoginException() {
         super("User already login");
     }
+
+    public UserAlreadyLoginException(String message) {
+        super(message);
+    }
 }
