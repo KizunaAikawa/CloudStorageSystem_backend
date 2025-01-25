@@ -1,6 +1,7 @@
 package ryu.cloudstoragesystem_backend.auth;
 
 import io.jsonwebtoken.Jwts;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ryu.cloudstoragesystem_backend.user.User;
@@ -16,6 +17,7 @@ public class TokenProvider {
     @Value("${token.secret-key-algorithm}")
     public String secretKeyAlgorithm;
 
+    @Getter
     @Value("${token.expiration}")
     private Long tokenExpiration;
 
