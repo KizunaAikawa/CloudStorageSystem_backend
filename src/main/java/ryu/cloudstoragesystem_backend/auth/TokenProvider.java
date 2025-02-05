@@ -14,7 +14,7 @@ import java.util.Date;
 public class TokenProvider {
     private static final String secretKey = "msvECEvTpGqMoZtGisuUar64pW6AGs1kzjwyJKaRMGw=";
 
-    @Value("${token.secret-key-algorithm}")
+    @Value("${token.key-algorithm}")
     public String secretKeyAlgorithm;
 
     @Getter
