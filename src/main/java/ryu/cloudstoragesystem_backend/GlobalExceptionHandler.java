@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import ryu.cloudstoragesystem_backend.auth.exception.LoginFailException;
 import ryu.cloudstoragesystem_backend.auth.exception.TokenUnavailableException;
 import ryu.cloudstoragesystem_backend.user.exception.UsernameConflictException;
@@ -21,12 +22,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getBindingResult().toString());
     }
 
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<String> handleMethodValidationException(HandlerMethodValidationException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<ErrorResponseBody> handleExpiredJwtException(ExpiredJwtException exception) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "*")
                 .body(new ErrorResponseBody("401", "Token expired"));
     }
 
@@ -34,8 +38,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseBody> handleTokenUnavailableException(TokenUnavailableException exception) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "*")
                 .body(new ErrorResponseBody("401", "Token unavailable"));
     }
 
@@ -43,8 +45,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseBody> handleUsernameConflictException(UsernameConflictException exception) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "*")
                 .body(new ErrorResponseBody("409", "Username already exists"));
     }
 
@@ -52,8 +52,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseBody> handleLoginFailException(LoginFailException exception) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "*")
                 .body(new ErrorResponseBody("403", "Login fail"));
     }
 
@@ -62,8 +60,6 @@ public class GlobalExceptionHandler {
         log.error(exception.getMessage(), exception);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "*")
                 .body(new ErrorResponseBody("500", "Unknown Error"));
     }
 }

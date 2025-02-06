@@ -2,7 +2,6 @@ package ryu.cloudstoragesystem_backend.user.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,8 +33,8 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public Map<String, String> register(@RequestBody @NotBlank String username,
-                                        @RequestBody @NotBlank @Size(min = 8, max = 32) String password,
+    public Map<String, String> register(@RequestParam @NotBlank String username,
+                                        @RequestParam @NotBlank String password,
                                         HttpServletResponse response) throws Exception {
         String token = registerService.register(username, password);
         response.setHeader("Authorization", token);
@@ -45,8 +44,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody @NotBlank String username,
-                                     @RequestBody @NotBlank @Size(min = 8, max = 32) String password,
+    public Map<String, String> login(@RequestParam @NotBlank String username,
+                                     @RequestParam @NotBlank String password,
                                      HttpServletResponse response) {
         String token = loginService.login(username, password);
         response.setHeader("Authorization", token);
@@ -57,7 +56,7 @@ public class UserController {
 
     @PutMapping("/me/password")
     public void setPassword(@RequestHeader @NotBlank String token,
-                            @RequestBody @NotBlank @Size(min = 8, max = 32) String password) {
+                            @RequestParam @NotBlank String password) {
         Long userId = authService.getPresentUser(token).getUserId();
         if (userService.isPasswordEmpty(userId)) {
             userService.setPassword(userId, password);
@@ -66,15 +65,15 @@ public class UserController {
 
     @PostMapping("/me/name")
     public void updateName(@RequestHeader @NotBlank String token,
-                           @RequestBody @NotBlank String name) {
+                           @RequestParam @NotBlank String name) {
         Long userId = authService.getPresentUser(token).getUserId();
         userService.setUsername(userId, name);
     }
 
     @PostMapping("/me/password")
     public void resetPassword(@RequestHeader @NotBlank String token,
-                              @RequestBody @NotBlank @Size(min = 8, max = 32) String oldPassword,
-                              @RequestBody @NotBlank @Size(min = 8, max = 32) String newPassword) {
+                              @RequestParam @NotBlank String oldPassword,
+                              @RequestParam @NotBlank String newPassword) {
         User user = authService.getPresentUser(token);
         if (user.getPassword().equals(oldPassword)) {
             userService.setPassword(user.getUserId(), newPassword);

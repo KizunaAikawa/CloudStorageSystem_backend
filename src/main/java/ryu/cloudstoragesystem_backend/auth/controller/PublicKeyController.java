@@ -21,11 +21,12 @@ public class PublicKeyController {
         this.publicKeyService = publicKeyService;
     }
 
+    //TODO：如果前端修改本地储存的expiration值，可能会导致公钥过期后不重新获取，或许需要新的实现方法
     @GetMapping("/public_key")
-    public Map<String, String> getPublicKey() {
-        Map<String, String> responseBody = new LinkedHashMap<>();
+    public Map<String, Object> getPublicKey() {
+        Map<String, Object> responseBody = new LinkedHashMap<>();
         responseBody.put("public_key", publicKeyService.getPublicKey());
-        responseBody.put("expiration",System.currentTimeMillis()+validTime.toString());
+        responseBody.put("expiration", (System.currentTimeMillis() + validTime));
         return responseBody;
     }
 }
