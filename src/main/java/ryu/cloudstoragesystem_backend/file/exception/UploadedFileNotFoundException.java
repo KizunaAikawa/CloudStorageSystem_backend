@@ -8,4 +8,8 @@ public class UploadedFileNotFoundException extends RuntimeException {
     public UploadedFileNotFoundException() {
         super("Target file not exist");
     }
+
+    public UploadedFileNotFoundException(String message) {
+        super(message);
+    }
 }

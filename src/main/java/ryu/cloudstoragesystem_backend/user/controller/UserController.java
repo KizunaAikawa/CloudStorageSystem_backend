@@ -2,15 +2,13 @@ package ryu.cloudstoragesystem_backend.user.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ryu.cloudstoragesystem_backend.auth.service.AuthService;
 import ryu.cloudstoragesystem_backend.user.User;
 import ryu.cloudstoragesystem_backend.user.exception.PasswordNotEmptyException;
-import ryu.cloudstoragesystem_backend.user.exception.UserAlreadyLoginException;
-import ryu.cloudstoragesystem_backend.user.exception.WrongPasswordException;
+import ryu.cloudstoragesystem_backend.user.exception.PasswordUnavailableException;
 import ryu.cloudstoragesystem_backend.user.service.LoginService;
 import ryu.cloudstoragesystem_backend.user.service.RegisterService;
 import ryu.cloudstoragesystem_backend.user.service.UserService;
@@ -36,8 +34,8 @@ public class UserController {
 
     @PostMapping("/register")
     public Map<String, String> register(@RequestParam @NotBlank String username,
-                                        @RequestParam @NotBlank @Size(min = 8, max = 32) String password,
-                                        HttpServletResponse response) {
+                                        @RequestParam @NotBlank String password,
+                                        HttpServletResponse response) throws Exception {
         String token = registerService.register(username, password);
         response.setHeader("Authorization", token);
         Map<String, String> responseBody = new LinkedHashMap<>();
@@ -47,20 +45,18 @@ public class UserController {
 
     @PostMapping("/login")
     public Map<String, String> login(@RequestParam @NotBlank String username,
-                                     @RequestParam @NotBlank @Size(min = 8, max = 32) String password,
+                                     @RequestParam @NotBlank String password,
                                      HttpServletResponse response) {
-        if (!authService.isLogin(username)) {
-            String token = loginService.login(username, password);
-            response.setHeader("Authorization", token);
-            Map<String, String> responseBody = new LinkedHashMap<>();
-            responseBody.put("username", username);
-            return responseBody;
-        } else throw new UserAlreadyLoginException();
+        String token = loginService.login(username, password);
+        response.setHeader("Authorization", token);
+        Map<String, String> responseBody = new LinkedHashMap<>();
+        responseBody.put("username", username);
+        return responseBody;
     }
 
     @PutMapping("/me/password")
     public void setPassword(@RequestHeader @NotBlank String token,
-                            @RequestParam @NotBlank @Size(min = 8, max = 32) String password) {
+                            @RequestParam @NotBlank String password) {
         Long userId = authService.getPresentUser(token).getUserId();
         if (userService.isPasswordEmpty(userId)) {
             userService.setPassword(userId, password);
@@ -76,11 +72,11 @@ public class UserController {
 
     @PostMapping("/me/password")
     public void resetPassword(@RequestHeader @NotBlank String token,
-                              @RequestParam("old-password") @NotBlank @Size(min = 8, max = 32) String oldPassword,
-                              @RequestParam("new-password") @NotBlank @Size(min = 8, max = 32) String newPassword) {
+                              @RequestParam @NotBlank String oldPassword,
+                              @RequestParam @NotBlank String newPassword) {
         User user = authService.getPresentUser(token);
         if (user.getPassword().equals(oldPassword)) {
             userService.setPassword(user.getUserId(), newPassword);
-        } else throw new WrongPasswordException();
+        } else throw new PasswordUnavailableException();
     }
 }
