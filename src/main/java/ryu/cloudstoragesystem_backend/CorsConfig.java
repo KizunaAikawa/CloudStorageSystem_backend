@@ -1,4 +1,4 @@
-package ryu.cloudstoragesystem_backend;
+/*package ryu.cloudstoragesystem_backend;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -13,7 +13,7 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(false) // 允许携带 Cookie
+                .allowCredentials(false)
                 .exposedHeaders("Authorization", "File-Name");
     }
-}
+}*/
