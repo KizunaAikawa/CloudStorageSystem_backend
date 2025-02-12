@@ -5,11 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import ryu.cloudstoragesystem_backend.auth.exception.LoginFailException;
 import ryu.cloudstoragesystem_backend.auth.exception.TokenUnavailableException;
+import ryu.cloudstoragesystem_backend.file.exception.EmptyFileException;
+import ryu.cloudstoragesystem_backend.user.exception.UserNotExistException;
 import ryu.cloudstoragesystem_backend.user.exception.UsernameConflictException;
 
 @RestControllerAdvice
@@ -18,41 +21,66 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getBindingResult().toString());
+    public ResponseEntity<ErrorResponseBody> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseBody("400","Bad request"));
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<String> handleMethodValidationException(HandlerMethodValidationException exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    public ResponseEntity<ErrorResponseBody> handleMethodValidationException(HandlerMethodValidationException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseBody("400","Bad request"));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponseBody> handleMissingServletRequestParameterException(MissingServletRequestParameterException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseBody("400","Bad request"));
+    }
+
+    @ExceptionHandler(EmptyFileException.class)
+    public ResponseEntity<ErrorResponseBody> handleEmptyFileException(EmptyFileException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseBody("400","Bad request"));
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<ErrorResponseBody> handleExpiredJwtException(ExpiredJwtException exception) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponseBody("401", "Token expired"));
+                .body(new ErrorResponseBody("401", exception.getMessage()));
     }
 
     @ExceptionHandler(TokenUnavailableException.class)
     public ResponseEntity<ErrorResponseBody> handleTokenUnavailableException(TokenUnavailableException exception) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponseBody("401", "Token unavailable"));
+                .body(new ErrorResponseBody("401", exception.getMessage()));
     }
 
     @ExceptionHandler(UsernameConflictException.class)
     public ResponseEntity<ErrorResponseBody> handleUsernameConflictException(UsernameConflictException exception) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(new ErrorResponseBody("409", "Username already exists"));
+                .body(new ErrorResponseBody("409", exception.getMessage()));
     }
 
     @ExceptionHandler(LoginFailException.class)
     public ResponseEntity<ErrorResponseBody> handleLoginFailException(LoginFailException exception) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponseBody("403", "Login fail"));
+                .body(new ErrorResponseBody("403", exception.getMessage()));
+    }
+
+    @ExceptionHandler(UserNotExistException.class)
+    public ResponseEntity<ErrorResponseBody> handleUserNotExistException(UserNotExistException exception) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponseBody("404", exception.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
