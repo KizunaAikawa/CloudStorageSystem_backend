@@ -1,14 +1,12 @@
 package ryu.cloudstoragesystem_backend.file.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.multipart.MultipartFile;
 import ryu.cloudstoragesystem_backend.file.CloudFile;
 import ryu.cloudstoragesystem_backend.file.CloudFileDAO;

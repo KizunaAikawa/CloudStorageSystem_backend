@@ -17,7 +17,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import ryu.cloudstoragesystem_backend.auth.JwtAuthenticationFilter;
 
-import java.io.File;
 import java.util.List;
 
 @Configuration

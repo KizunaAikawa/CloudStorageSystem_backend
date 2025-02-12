@@ -24,28 +24,28 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseBody> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseBody("400","Bad request"));
+                .body(new ErrorResponseBody("400", "Bad request"));
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<ErrorResponseBody> handleMethodValidationException(HandlerMethodValidationException exception) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseBody("400","Bad request"));
+                .body(new ErrorResponseBody("400", "Bad request"));
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponseBody> handleMissingServletRequestParameterException(MissingServletRequestParameterException exception) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseBody("400","Bad request"));
+                .body(new ErrorResponseBody("400", "Bad request"));
     }
 
     @ExceptionHandler(EmptyFileException.class)
     public ResponseEntity<ErrorResponseBody> handleEmptyFileException(EmptyFileException exception) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseBody("400","Bad request"));
+                .body(new ErrorResponseBody("400", "Bad request"));
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
