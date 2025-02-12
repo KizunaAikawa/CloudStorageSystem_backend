@@ -72,6 +72,6 @@ public class GlobalExceptionHandler {
         log.error(exception.getMessage(), exception);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponseBody("500", exception.getMessage()));
+                .body(new ErrorResponseBody("500", "Unknown Error"));
     }
 }

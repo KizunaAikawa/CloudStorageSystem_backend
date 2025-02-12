@@ -23,6 +23,7 @@ public class RegisterService {
         this.keyPairProvider = keyPairProvider;
     }
 
+    //TODO:加入解密后判空，为空则抛出Bad Request异常类
     @Transactional
     public String register(String username, String password) throws Exception {
         if (!userDAO.existsByUsername(username)) {
