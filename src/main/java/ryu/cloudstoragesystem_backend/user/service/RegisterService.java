@@ -3,6 +3,7 @@ package ryu.cloudstoragesystem_backend.user.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ryu.cloudstoragesystem_backend.BadRequestParamException;
 import ryu.cloudstoragesystem_backend.auth.KeyPairProvider;
 import ryu.cloudstoragesystem_backend.auth.TokenProvider;
 import ryu.cloudstoragesystem_backend.user.User;
@@ -11,7 +12,6 @@ import ryu.cloudstoragesystem_backend.user.exception.UsernameConflictException;
 
 @Service
 public class RegisterService {
-    //private final TokenDAO tokenDAO;
     private final UserDAO userDAO;
     private final TokenProvider tokenProvider;
     private final KeyPairProvider keyPairProvider;
@@ -23,11 +23,13 @@ public class RegisterService {
         this.keyPairProvider = keyPairProvider;
     }
 
-    //TODO:加入解密后判空，为空则抛出Bad Request异常类
     @Transactional
     public String register(String username, String password) throws Exception {
         if (!userDAO.existsByUsername(username)) {
             String rawPassword = keyPairProvider.decrypt(password);
+            if (rawPassword.isEmpty()) {
+                throw new BadRequestParamException();
+            }
             User user = new User(username, rawPassword);
             userDAO.save(user);
             return tokenProvider.generateToken(user);
