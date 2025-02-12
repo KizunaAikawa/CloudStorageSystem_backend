@@ -19,13 +19,17 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getBindingResult().toString());
+    public ResponseEntity<ErrorResponseBody> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseBody("400","Bad request"));
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<String> handleMethodValidationException(HandlerMethodValidationException exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    public ResponseEntity<ErrorResponseBody> handleMethodValidationException(HandlerMethodValidationException exception) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseBody("400","Bad request"));
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
