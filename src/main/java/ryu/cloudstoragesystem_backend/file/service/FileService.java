@@ -8,10 +8,10 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ryu.cloudstoragesystem_backend.BadRequestParamException;
 import ryu.cloudstoragesystem_backend.file.CloudFile;
 import ryu.cloudstoragesystem_backend.file.CloudFileDAO;
 import ryu.cloudstoragesystem_backend.file.DownloadedFile;
-import ryu.cloudstoragesystem_backend.file.exception.EmptyFileException;
 import ryu.cloudstoragesystem_backend.file.exception.UploadedFileNotFoundException;
 import ryu.cloudstoragesystem_backend.user.User;
 import ryu.cloudstoragesystem_backend.util.MD5Util;
@@ -40,7 +40,7 @@ public class FileService {
             byte[] data = file.getInputStream().readAllBytes();
             //存储文件实体
             if (!(data.length > 0)) {
-                throw new EmptyFileException();
+                throw new BadRequestParamException();
             }
             String md5 = MD5Util.getMD5(data);
             String fileName = file.getOriginalFilename();
@@ -70,7 +70,6 @@ public class FileService {
         }
     }
 
-    //Todo:导入Google Map API限制范围
     public DownloadedFile download(User user, CloudFile file) {
         try {
             Path filePath = Path.of(fileRootPath, file.getMD5());

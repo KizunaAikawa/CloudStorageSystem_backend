@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import ryu.cloudstoragesystem_backend.auth.exception.LoginFailException;
 import ryu.cloudstoragesystem_backend.auth.exception.TokenUnavailableException;
-import ryu.cloudstoragesystem_backend.file.exception.EmptyFileException;
 import ryu.cloudstoragesystem_backend.user.exception.UserNotExistException;
 import ryu.cloudstoragesystem_backend.user.exception.UsernameConflictException;
 
@@ -41,8 +40,8 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponseBody("400", "Bad request"));
     }
 
-    @ExceptionHandler(EmptyFileException.class)
-    public ResponseEntity<ErrorResponseBody> handleEmptyFileException(EmptyFileException exception) {
+    @ExceptionHandler(BadRequestParamException.class)
+    public ResponseEntity<ErrorResponseBody> handleBadRequestParamException(BadRequestParamException exception) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseBody("400", "Bad request"));
