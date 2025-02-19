@@ -9,23 +9,16 @@ import org.springframework.stereotype.Service;
 import ryu.cloudstoragesystem_backend.auth.KeyPairProvider;
 import ryu.cloudstoragesystem_backend.auth.TokenProvider;
 import ryu.cloudstoragesystem_backend.auth.exception.LoginFailException;
-import ryu.cloudstoragesystem_backend.user.User;
-import ryu.cloudstoragesystem_backend.user.UserDAO;
-import ryu.cloudstoragesystem_backend.user.exception.UserNotExistException;
-
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class LoginService {
-    private final UserDAO userDAO;
     private final TokenProvider tokenProvider;
     private final RedisTemplate<String, String> redisStringTemplate;
     private final KeyPairProvider keyPairProvider;
     private final AuthenticationManager authenticationManager;
 
     @Autowired
-    public LoginService(UserDAO userDAO, TokenProvider tokenProvider, RedisTemplate<String, String> redisStringTemplate, KeyPairProvider keyPairProvider, AuthenticationManager authenticationManager) {
-        this.userDAO = userDAO;
+    public LoginService(TokenProvider tokenProvider, RedisTemplate<String, String> redisStringTemplate, KeyPairProvider keyPairProvider, AuthenticationManager authenticationManager) {
         this.tokenProvider = tokenProvider;
         this.redisStringTemplate = redisStringTemplate;
         this.keyPairProvider = keyPairProvider;
@@ -34,9 +27,9 @@ public class LoginService {
 
     public String login(String username, String password) {
         String rawPassword = keyPairProvider.decrypt(password);
-        try{
+        try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, rawPassword));
-        }catch (AuthenticationException e){
+        } catch (AuthenticationException e) {
             throw new LoginFailException();
         }
         String token = tokenProvider.generateToken(username);

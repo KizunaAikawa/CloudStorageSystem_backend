@@ -32,7 +32,7 @@ public class RegisterService {
     }
 
     @Transactional
-    public String register(String username, String password) throws Exception {
+    public String register(String username, String password) {
         if (!userDAO.existsByUsername(username)) {
             String rawPassword = keyPairProvider.decrypt(password);
             if (rawPassword.isEmpty()) {
