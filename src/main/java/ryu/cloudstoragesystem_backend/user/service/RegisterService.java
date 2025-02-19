@@ -2,6 +2,7 @@ package ryu.cloudstoragesystem_backend.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ryu.cloudstoragesystem_backend.BadRequestParamException;
@@ -19,23 +20,26 @@ public class RegisterService {
     private final TokenProvider tokenProvider;
     private final KeyPairProvider keyPairProvider;
     private final RedisTemplate<String, String> redisStringTemplate;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public RegisterService(UserDAO userDAO, TokenProvider tokenProvider, KeyPairProvider keyPairProvider, RedisTemplate<String, String> redisStringTemplate) {
+    public RegisterService(UserDAO userDAO, TokenProvider tokenProvider, KeyPairProvider keyPairProvider, RedisTemplate<String, String> redisStringTemplate, PasswordEncoder passwordEncoder) {
         this.userDAO = userDAO;
         this.tokenProvider = tokenProvider;
         this.keyPairProvider = keyPairProvider;
         this.redisStringTemplate = redisStringTemplate;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
-    public String register(String username, String password) throws Exception {
+    public String register(String username, String password) {
         if (!userDAO.existsByUsername(username)) {
             String rawPassword = keyPairProvider.decrypt(password);
             if (rawPassword.isEmpty()) {
                 throw new BadRequestParamException();
             }
             User user = new User(username, rawPassword);
+            user.setPassword(passwordEncoder.encode(rawPassword));
             userDAO.save(user);
             String token = tokenProvider.generateToken(user);
             redisStringTemplate.opsForValue().set(username, token, tokenProvider.getTokenExpiration(), TimeUnit.MILLISECONDS);
