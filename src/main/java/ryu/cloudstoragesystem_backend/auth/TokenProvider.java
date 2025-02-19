@@ -31,6 +31,16 @@ public class TokenProvider {
                 .compact();
     }
 
+    public String generateToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setNotBefore(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
+                .signWith(getSecretKey())
+                .compact();
+    }
+
     public String getUsernameByToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSecretKey())

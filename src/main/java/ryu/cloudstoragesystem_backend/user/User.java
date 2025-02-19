@@ -13,7 +13,6 @@ public class User {
 
     private String username;
 
-    @Column(length = 32)
     private String password;
 
     public User() {
