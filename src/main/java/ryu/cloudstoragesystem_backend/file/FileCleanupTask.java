@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Slf4j
@@ -24,16 +25,21 @@ public class FileCleanupTask {
 
     private final CloudFileDAO cloudFileDAO;
 
+    private final ShareCodePool shareCodePool;
+
     @Autowired
-    public FileCleanupTask(CloudFileDAO cloudFileDAO) {
+    public FileCleanupTask(CloudFileDAO cloudFileDAO, ShareCodePool shareCodePool) {
         this.cloudFileDAO = cloudFileDAO;
+        this.shareCodePool = shareCodePool;
     }
 
     @Scheduled(fixedRateString = "${file.cleanup-interval}")
     public void cleanup() {
         long now = System.currentTimeMillis();
+        AtomicInteger count = new AtomicInteger(0);
         List<CloudFile> files = cloudFileDAO.findByTimeStampBefore(now - validTime);
         files.forEach(f -> {
+            //对未标记为移除的过期文件进行标记，这些文件将在下次轮询时被真正删除
             if (!f.getRemovedFlag()) {
                 f.setRemovedFlag(true);
                 cloudFileDAO.save(f);
@@ -45,9 +51,11 @@ public class FileCleanupTask {
                 } catch (IOException e) {
                     log.warn("File {} delete fail at {}, check the file root directory!", f.getFileName() + f.getExtension(), LocalDateTime.now());
                 }
+                cloudFileDAO.deleteById(f.getFileId());
+                shareCodePool.release(f.getShareCode());
+                count.getAndIncrement();
             }
         });
-        int count = cloudFileDAO.deleteByRemovedFlag(true);
-        log.info("File cleanup task completed at {}, {} file(s) deleted.", LocalDateTime.now(), count);
+        log.info("File cleanup task completed at {}, {} file(s) deleted.", LocalDateTime.now(), count.get());
     }
 }
