@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,14 +35,17 @@ public class FileCleanupTask {
     }
 
     @Scheduled(fixedRateString = "${file.cleanup-interval}")
-    public void cleanup() {
+    @Transactional
+    public synchronized void cleanup() {
         long now = System.currentTimeMillis();
         AtomicInteger count = new AtomicInteger(0);
         List<CloudFile> files = cloudFileDAO.findByTimeStampBefore(now - validTime);
         files.forEach(f -> {
             //对未标记为移除的过期文件进行标记，这些文件将在下次轮询时被真正删除
             if (!f.getRemovedFlag()) {
+                shareCodePool.release(f.getShareCode());
                 f.setRemovedFlag(true);
+                f.setShareCode(null);
                 cloudFileDAO.save(f);
             } else {
                 Path path = Paths.get(fileRootPath + f.getMD5());
@@ -52,7 +56,6 @@ public class FileCleanupTask {
                     log.warn("File {} delete fail at {}, check the file root directory!", f.getFileName() + f.getExtension(), LocalDateTime.now());
                 }
                 cloudFileDAO.deleteById(f.getFileId());
-                shareCodePool.release(f.getShareCode());
                 count.getAndIncrement();
             }
         });

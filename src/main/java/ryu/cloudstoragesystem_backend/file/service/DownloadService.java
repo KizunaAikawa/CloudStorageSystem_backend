@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ryu.cloudstoragesystem_backend.file.CloudFile;
 import ryu.cloudstoragesystem_backend.file.CloudFileDAO;
 import ryu.cloudstoragesystem_backend.file.DownloadedFile;
+import ryu.cloudstoragesystem_backend.file.ShareCodePool;
 import ryu.cloudstoragesystem_backend.file.exception.UploadedFileNotFoundException;
 import ryu.cloudstoragesystem_backend.user.User;
 
@@ -27,10 +28,13 @@ public class DownloadService {
 
     private final RedisTemplate<String, Integer> redisTemplate;
 
+    private final ShareCodePool shareCodePool;
+
     @Autowired
-    public DownloadService(CloudFileDAO cloudFileDAO, RedisTemplate<String, Integer> redisTemplate) {
+    public DownloadService(CloudFileDAO cloudFileDAO, RedisTemplate<String, Integer> redisTemplate,ShareCodePool shareCodePool) {
         this.cloudFileDAO = cloudFileDAO;
         this.redisTemplate = redisTemplate;
+        this.shareCodePool = shareCodePool;
     }
 
     @Transactional
@@ -52,7 +56,9 @@ public class DownloadService {
 
                     //如果减少前为1，则标记为删除
                     if (fileMaxUsage == 1) {
+                        shareCodePool.release(file.getShareCode());
                         file.setRemovedFlag(true);
+                        file.setShareCode(null);
                         cloudFileDAO.save(file);
                         redisTemplate.delete(redisKey);
                     }
