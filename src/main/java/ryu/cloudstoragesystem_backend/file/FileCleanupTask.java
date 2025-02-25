@@ -34,10 +34,10 @@ public class FileCleanupTask {
         long now = System.currentTimeMillis();
         List<CloudFile> files = cloudFileDAO.findByTimeStampBefore(now - validTime);
         files.forEach(f -> {
-            if (!f.getRemovedFlag()){
+            if (!f.getRemovedFlag()) {
                 f.setRemovedFlag(true);
                 cloudFileDAO.save(f);
-            }else {
+            } else {
                 Path path = Paths.get(fileRootPath + f.getMD5());
                 try {
                     Files.delete(path);

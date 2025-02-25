@@ -44,7 +44,7 @@ public class FileController {
 
     @PutMapping("/file/upload")
     public Map<String, String> upload(@RequestHeader("Authorization") @NotBlank String token,
-                                      @RequestParam(value = "share-code",required = false) @Pattern(regexp = "^[A-Z0-9]{6}$") String shareCode,
+                                      @RequestParam(value = "share-code", required = false) @Pattern(regexp = "^[A-Z0-9]{6}$") String shareCode,
                                       @RequestParam(value = "limit", defaultValue = "1") Integer maxUsage,
                                       @NotNull MultipartFile file) {
         User user = authService.getPresentUser(token);
@@ -85,7 +85,7 @@ public class FileController {
 
     //TODO：测试接口，提交PR之前记得删掉
     @PutMapping("/file/test_upload")
-    public Map<String, String> test_upload(@RequestParam(value = "share-code",required = false) @Pattern(regexp = "^[A-Z0-9]{6}$") String shareCode,
+    public Map<String, String> test_upload(@RequestParam(value = "share-code", required = false) @Pattern(regexp = "^[A-Z0-9]{6}$") String shareCode,
                                            @RequestParam(value = "limit", defaultValue = "1") Integer maxUsage,
                                            @NotNull MultipartFile file) {
         User user = new User("test_user", "12345678");

@@ -35,7 +35,7 @@ public class DownloadService {
 
     @Transactional
     public DownloadedFile download(User user, CloudFile file) {
-        if (file.getRemovedFlag()){
+        if (file.getRemovedFlag()) {
             throw new UploadedFileNotFoundException();
         }
         String redisKey = "file:" + file.getFileId();
