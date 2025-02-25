@@ -34,15 +34,20 @@ public class FileCleanupTask {
         long now = System.currentTimeMillis();
         List<CloudFile> files = cloudFileDAO.findByTimeStampBefore(now - validTime);
         files.forEach(f -> {
-            Path path = Paths.get(fileRootPath + f.getMD5());
-            try {
-                Files.delete(path);
-                log.info("File {} delete success at {}", f.getFileName() + f.getExtension(), LocalDateTime.now());
-            } catch (IOException e) {
-                log.warn("File {} delete fail at {}, check the file root directory!", f.getFileName() + f.getExtension(), LocalDateTime.now());
+            if (!f.getRemovedFlag()){
+                f.setRemovedFlag(true);
+                cloudFileDAO.save(f);
+            }else {
+                Path path = Paths.get(fileRootPath + f.getMD5());
+                try {
+                    Files.delete(path);
+                    log.info("File {} delete success at {}", f.getFileName() + f.getExtension(), LocalDateTime.now());
+                } catch (IOException e) {
+                    log.warn("File {} delete fail at {}, check the file root directory!", f.getFileName() + f.getExtension(), LocalDateTime.now());
+                }
             }
         });
-        int count = cloudFileDAO.deleteByTimeStampBefore(now - validTime);
+        int count = cloudFileDAO.deleteByRemovedFlag(true);
         log.info("File cleanup task completed at {}, {} file(s) deleted.", LocalDateTime.now(), count);
     }
 }

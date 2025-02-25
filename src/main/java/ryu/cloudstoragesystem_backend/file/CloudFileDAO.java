@@ -15,4 +15,7 @@ public interface CloudFileDAO extends JpaRepository<CloudFile, Long> {
 
     @Transactional
     int deleteByTimeStampBefore(Long timeStamp);
+
+    @Transactional
+    int deleteByRemovedFlag(Boolean removedFlag);
 }

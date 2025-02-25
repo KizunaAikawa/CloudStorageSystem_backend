@@ -25,6 +25,7 @@ public class LoginService {
         this.authenticationManager = authenticationManager;
     }
 
+    //TODO：Redis缓存写的不对
     public String login(String username, String password) {
         String rawPassword = keyPairProvider.decrypt(password);
         try {

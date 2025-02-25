@@ -40,6 +40,8 @@ public class SecurityConfig {
                         .requestMatchers("/register").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/public_key").permitAll()
+                        .requestMatchers("file/test_download").permitAll()
+                        .requestMatchers("file/test_upload").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
