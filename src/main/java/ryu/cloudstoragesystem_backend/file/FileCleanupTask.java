@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ryu.cloudstoragesystem_backend.file.service.FileService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,12 +27,12 @@ public class FileCleanupTask {
 
     private final CloudFileDAO cloudFileDAO;
 
-    private final ShareCodePool shareCodePool;
+    private final FileService fileService;
 
     @Autowired
-    public FileCleanupTask(CloudFileDAO cloudFileDAO, ShareCodePool shareCodePool) {
+    public FileCleanupTask(CloudFileDAO cloudFileDAO, ShareCodePool shareCodePool, FileService fileService) {
         this.cloudFileDAO = cloudFileDAO;
-        this.shareCodePool = shareCodePool;
+        this.fileService = fileService;
     }
 
     @Scheduled(fixedRateString = "${file.cleanup-interval}")
@@ -43,10 +44,7 @@ public class FileCleanupTask {
         files.forEach(f -> {
             //对未标记为移除的过期文件进行标记，这些文件将在下次轮询时被真正删除
             if (!f.getRemovedFlag()) {
-                shareCodePool.release(f.getShareCode());
-                f.setRemovedFlag(true);
-                f.setShareCode(null);
-                cloudFileDAO.save(f);
+                fileService.markFileAsRemoved(f);
             } else {
                 Path path = Paths.get(fileRootPath + f.getMD5());
                 try {

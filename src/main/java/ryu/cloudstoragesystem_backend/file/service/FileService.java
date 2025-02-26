@@ -3,6 +3,8 @@ package ryu.cloudstoragesystem_backend.file.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +13,9 @@ import ryu.cloudstoragesystem_backend.BadRequestParamException;
 import ryu.cloudstoragesystem_backend.ServerErrorException;
 import ryu.cloudstoragesystem_backend.file.CloudFile;
 import ryu.cloudstoragesystem_backend.file.CloudFileDAO;
+import ryu.cloudstoragesystem_backend.file.DownloadedFile;
 import ryu.cloudstoragesystem_backend.file.ShareCodePool;
+import ryu.cloudstoragesystem_backend.file.exception.UploadedFileNotFoundException;
 import ryu.cloudstoragesystem_backend.user.User;
 import ryu.cloudstoragesystem_backend.util.MD5Util;
 
@@ -24,25 +28,18 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-public class UploadService {
+public class FileService {
     @Value("${file.root-path}")
     private String fileRootPath;
 
     @Value("${file.valid-time}")
-    private Long validTime;
+    private long fileValidTime;
 
     private final CloudFileDAO cloudFileDAO;
 
-    private final ShareCodePool shareCodePool;
-
     private final RedisTemplate<String, Integer> redisTemplate;
 
-    @Autowired
-    public UploadService(CloudFileDAO cloudFileDAO, ShareCodePool shareCodePool, RedisTemplate<String, Integer> redisTemplate) {
-        this.cloudFileDAO = cloudFileDAO;
-        this.shareCodePool = shareCodePool;
-        this.redisTemplate = redisTemplate;
-    }
+    private final ShareCodePool shareCodePool;
 
     @Transactional
     public void upload(User user, MultipartFile file, String shareCode, Integer maxUsage
@@ -79,7 +76,7 @@ public class UploadService {
             }
 
             //在Redis中缓存下载次数
-            redisTemplate.opsForValue().set("file:" + sharedFile.getFileId(), maxUsage, validTime, TimeUnit.MILLISECONDS);
+            redisTemplate.opsForValue().set("file:" + sharedFile.getFileId(), maxUsage, fileValidTime, TimeUnit.MILLISECONDS);
 
         } catch (IOException e) {
             throw new ServerErrorException(e.getMessage());
@@ -92,4 +89,58 @@ public class UploadService {
         upload(user, file, shareCode, maxUsage);
         return shareCode;
     }
+
+    @Autowired
+    public FileService(CloudFileDAO cloudFileDAO, RedisTemplate<String, Integer> redisTemplate, ShareCodePool shareCodePool) {
+        this.cloudFileDAO = cloudFileDAO;
+        this.redisTemplate = redisTemplate;
+        this.shareCodePool = shareCodePool;
+    }
+
+    @Transactional
+    public DownloadedFile download(User user, CloudFile file) {
+        if (file.getRemovedFlag()) {
+            throw new UploadedFileNotFoundException();
+        }
+        String redisKey = "file:" + file.getFileId();
+        Integer fileMaxUsage = redisTemplate.opsForValue().get(redisKey);
+        try {
+            Path filePath = Path.of(fileRootPath, file.getMD5());
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists()) {
+                log.info("User {} downloaded file{}.{} at {}", user.getUserId(), file.getFileName(), file.getExtension(), LocalDateTime.now());
+
+                //减少文件可用次数，-1代表有效时间内无限次可用
+                if (fileMaxUsage != -1) {
+                    redisTemplate.opsForValue().decrement(redisKey);
+
+                    //如果减少前为1，则标记为删除
+                    if (fileMaxUsage == 1) {
+                        markFileAsRemoved(file);
+                    }
+                }
+                return new DownloadedFile(file.getFileName(), file.getExtension(), resource.contentLength(), resource);
+            } else throw new UploadedFileNotFoundException();
+        } catch (Exception e) {
+            throw new UploadedFileNotFoundException();
+        }
+    }
+
+    @Transactional
+    public DownloadedFile download(User user, String shareCode) {
+        CloudFile file = cloudFileDAO.findByShareCode(shareCode).orElseThrow(UploadedFileNotFoundException::new);
+        return download(user, file);
+    }
+
+    @Transactional
+    public void markFileAsRemoved(CloudFile file) {
+        String shareCodeCache = file.getShareCode();
+        file.setRemovedFlag(true);
+        file.setShareCode(null);
+        cloudFileDAO.save(file);
+        shareCodePool.release(shareCodeCache);
+        redisTemplate.delete(shareCodeCache);
+    }
+
+
 }

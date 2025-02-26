@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ryu.cloudstoragesystem_backend.auth.service.AuthService;
 import ryu.cloudstoragesystem_backend.file.DownloadedFile;
-import ryu.cloudstoragesystem_backend.file.service.DownloadService;
-import ryu.cloudstoragesystem_backend.file.service.UploadService;
+import ryu.cloudstoragesystem_backend.file.service.FileService;
 import ryu.cloudstoragesystem_backend.user.User;
 
 import java.io.*;
@@ -22,14 +21,12 @@ import java.util.Map;
 
 @RestController
 public class FileController {
-    private final UploadService uploadService;
-    private final DownloadService downloadService;
+    private final FileService fileService;
     private final AuthService authService;
 
     @Autowired
-    public FileController(UploadService uploadService, DownloadService downloadService, AuthService authService, RedisTemplate<String, String> redisTemplate) {
-        this.uploadService = uploadService;
-        this.downloadService = downloadService;
+    public FileController(FileService fileService, AuthService authService, RedisTemplate<String, String> redisTemplate) {
+        this.fileService = fileService;
         this.authService = authService;
     }
 
@@ -38,7 +35,7 @@ public class FileController {
                             @RequestParam("share-code") @NotBlank @Pattern(regexp = "^\\d{4}$") String shareCode,
                             @NotNull MultipartFile file) {
         User user = authService.getPresentUser(token);
-        uploadService.upload(user, file, shareCode, -1);
+        fileService.upload(user, file, shareCode, -1);
         return shareCode;
     }
 
@@ -49,9 +46,9 @@ public class FileController {
                                       @NotNull MultipartFile file) {
         User user = authService.getPresentUser(token);
         if (shareCode != null && !shareCode.isEmpty()) {
-            uploadService.upload(user, file, shareCode, maxUsage);
+            fileService.upload(user, file, shareCode, maxUsage);
         } else {
-            shareCode = uploadService.uploadWithGeneratedCode(user, file, maxUsage);
+            shareCode = fileService.uploadWithGeneratedCode(user, file, maxUsage);
         }
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("shareCode", shareCode);
@@ -63,7 +60,7 @@ public class FileController {
                          @RequestParam("share-code") @NotBlank @Pattern(regexp = "^\\d{4}$") String shareCode,
                          HttpServletResponse response) throws IOException {
         User user = authService.getPresentUser(token);
-        DownloadedFile downloadedFile = downloadService.download(user, shareCode);
+        DownloadedFile downloadedFile = fileService.download(user, shareCode);
         File file = downloadedFile.getResource().getFile();
         String fileName = downloadedFile.getFileName() + "." + downloadedFile.getExtension();
         fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
@@ -91,9 +88,9 @@ public class FileController {
         User user = new User("test_user", "12345678");
         user.setUserId(Long.valueOf("252"));
         if (shareCode != null && !shareCode.isEmpty()) {
-            uploadService.upload(user, file, shareCode, maxUsage);
+            fileService.upload(user, file, shareCode, maxUsage);
         } else {
-            shareCode = uploadService.uploadWithGeneratedCode(user, file, maxUsage);
+            shareCode = fileService.uploadWithGeneratedCode(user, file, maxUsage);
         }
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("shareCode", shareCode);
@@ -105,7 +102,7 @@ public class FileController {
                               HttpServletResponse response) throws IOException {
         User user = new User("test_user", "12345678");
         user.setUserId(Long.valueOf("252"));
-        DownloadedFile downloadedFile = downloadService.download(user, shareCode);
+        DownloadedFile downloadedFile = fileService.download(user, shareCode);
         File file = downloadedFile.getResource().getFile();
         String fileName = downloadedFile.getFileName() + "." + downloadedFile.getExtension();
         fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
