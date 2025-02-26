@@ -25,7 +25,7 @@ public class FileController {
     private final AuthService authService;
 
     @Autowired
-    public FileController(FileService fileService, AuthService authService, RedisTemplate<String, String> redisTemplate) {
+    public FileController(FileService fileService, AuthService authService) {
         this.fileService = fileService;
         this.authService = authService;
     }

@@ -30,7 +30,7 @@ public class FileCleanupTask {
     private final FileService fileService;
 
     @Autowired
-    public FileCleanupTask(CloudFileDAO cloudFileDAO, ShareCodePool shareCodePool, FileService fileService) {
+    public FileCleanupTask(CloudFileDAO cloudFileDAO, FileService fileService) {
         this.cloudFileDAO = cloudFileDAO;
         this.fileService = fileService;
     }
