@@ -10,6 +10,8 @@ import ryu.cloudstoragesystem_backend.auth.KeyPairProvider;
 import ryu.cloudstoragesystem_backend.auth.TokenProvider;
 import ryu.cloudstoragesystem_backend.auth.exception.LoginFailException;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
 public class LoginService {
     private final TokenProvider tokenProvider;
@@ -25,6 +27,7 @@ public class LoginService {
         this.authenticationManager = authenticationManager;
     }
 
+    //TODO：Redis缓存写的不对
     public String login(String username, String password) {
         String rawPassword = keyPairProvider.decrypt(password);
         try {
@@ -33,7 +36,7 @@ public class LoginService {
             throw new LoginFailException();
         }
         String token = tokenProvider.generateToken(username);
-        redisStringTemplate.opsForValue().set(token, username);
+        redisStringTemplate.opsForValue().set(username, token, tokenProvider.getTokenExpiration(), TimeUnit.MILLISECONDS);
         return token;
     }
 }

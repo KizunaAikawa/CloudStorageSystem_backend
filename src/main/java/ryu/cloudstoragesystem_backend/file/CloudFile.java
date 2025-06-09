@@ -24,6 +24,10 @@ public class CloudFile {
 
     private String shareCode;
 
+    private Integer maxUsage;
+
+    private Boolean removedFlag;
+
     private Long timeStamp;
 
 
@@ -33,6 +37,7 @@ public class CloudFile {
     public CloudFile(String fileName, String extension) {
         this.fileName = fileName;
         this.extension = extension;
+        this.removedFlag = false;
         this.timeStamp = System.currentTimeMillis();
     }
 

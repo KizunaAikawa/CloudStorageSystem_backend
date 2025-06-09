@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import ryu.cloudstoragesystem_backend.auth.exception.LoginFailException;
 import ryu.cloudstoragesystem_backend.auth.exception.TokenUnavailableException;
+import ryu.cloudstoragesystem_backend.file.exception.UploadedFileNotFoundException;
 import ryu.cloudstoragesystem_backend.user.exception.UserNotExistException;
 import ryu.cloudstoragesystem_backend.user.exception.UsernameConflictException;
 
@@ -77,6 +78,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotExistException.class)
     public ResponseEntity<ErrorResponseBody> handleUserNotExistException(UserNotExistException exception) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponseBody("404", exception.getMessage()));
+    }
+
+    @ExceptionHandler(UploadedFileNotFoundException.class)
+    public ResponseEntity<ErrorResponseBody> handleUploadedFileNotFoundException(UploadedFileNotFoundException exception) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponseBody("404", exception.getMessage()));
